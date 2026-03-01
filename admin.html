@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RECIV Admin Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      padding: 30px;
+      color: white;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+
+    .header p {
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 25px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.95);
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      color: #1e3c72;
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #f4f6f9;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .pending { background: orange; }
+    .resolved { background: green; }
+
+    .high { background: red; }
+    .medium { background: orange; }
+    .low { background: green; }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(45deg,#1e3c72,#2a5298);
+      color: white;
+      cursor: pointer;
+      margin-top: 8px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .delete-btn {
+      background: crimson;
+    }
+
+    img {
+      width: 100%;
+      max-width: 220px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    a {
+      font-size: 13px;
+      color: #1e3c72;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>📊 RECIV Admin Dashboard</h1>
+  <p>Smart Civic Intelligence & Governance Analytics</p>
+</div>
+
+<div class="dashboard">
+
+  <!-- Leaderboard Panel -->
+
+  <div class="panel">
+    <h2>🏆 Department Leaderboard</h2>
+    <div id="leaderboardBox">Loading...</div>
+  </div>
+
+  <!-- Complaints Panel -->
+
+  <div class="panel">
+    <h2>📋 All Complaints</h2>
+    <div id="complaints"></div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDgBVweZ7uSQrKvMOupfRkS-sDBLI2lFNU",
+  authDomain: "reciv-21e5d.firebaseapp.com",
+  projectId: "reciv-21e5d",
+  storageBucket: "reciv-21e5d.firebasestorage.app",
+  messagingSenderId: "503172859164",
+  appId: "1:503172859164:web:846ca4cec88e037d66a6d9"
+};
+
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+
+/////////////////////////////////////////////////////
+// 🏆 LOAD LEADERBOARD
+/////////////////////////////////////////////////////
+
+function loadLeaderboard() {
+
+  db.collection("DEPARTMENTS")
+    .orderBy("trustScore", "desc")
+    .get()
+    .then(snapshot => {
+
+      let html = "";
+      let rank = 1;
+
+      if (snapshot.empty) {
+        html = "No ratings yet.";
+      }
+
+      snapshot.forEach(doc => {
+
+        let data = doc.data();
+
+        html += `
+          <div class="card">
+            <b>#${rank} ${doc.id}</b><br>
+            Trust Score: <b>${data.trustScore}%</b><br>
+            Rated Complaints: ${data.totalComplaints}
+          </div>
+        `;
+
+        rank++;
+
+      });
+
+      document.getElementById("leaderboardBox").innerHTML = html;
+
+    });
+
+}
+
+/////////////////////////////////////////////////////
+// 📋 LOAD COMPLAINTS
+/////////////////////////////////////////////////////
+
+db.collection("COMPLAINTS").onSnapshot(snapshot => {
+
+  let html = "";
+
+  snapshot.forEach(doc => {
+
+    let data = doc.data();
+
+    html += `
+      <div class="card">
+
+        <b>${data.title}</b><br>
+        ${data.description}<br><br>
+
+        <b>Status:</b>
+        <span class="badge ${data.status === "Pending" ? "pending" : "resolved"}">
+          ${data.status}
+        </span><br><br>
+
+        <b>Priority:</b>
+        <span class="badge ${data.priority.toLowerCase()}">
+          ${data.priority}
+        </span><br><br>
+
+        <b>Department:</b> ${data.department}<br>
+        <b>Location:</b> ${data.location}<br><br>
+
+        ${data.image ? `<img src="${data.image}"><br>` : ""}
+
+        <a href="https://www.google.com/maps?q=${data.latitude},${data.longitude}" target="_blank">
+          📍 View on Map
+        </a><br><br>
+
+        ${data.status === "Pending" ? `
+          <button onclick="updateStatus('${doc.id}')">Mark Resolved</button>
+        ` : `
+          <button class="delete-btn" onclick="deleteComplaint('${doc.id}')">
+            Delete Complaint
+          </button>
+        `}
+
+      </div>
+    `;
+
+  });
+
+  document.getElementById("complaints").innerHTML = html;
+
+});
+
+/////////////////////////////////////////////////////
+// UPDATE STATUS
+/////////////////////////////////////////////////////
+
+function updateStatus(id) {
+  db.collection("COMPLAINTS").doc(id).update({
+    status: "Resolved"
+  });
+}
+
+/////////////////////////////////////////////////////
+// DELETE
+/////////////////////////////////////////////////////
+
+function deleteComplaint(id) {
+  if (confirm("Delete this complaint?")) {
+    db.collection("COMPLAINTS").doc(id).delete();
+  }
+}
+
+window.onload = function() {
+  loadLeaderboard();
+};
+
+</script>
+
+</body>
+</html></html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RECIV — Smart Civic Intelligence</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url("https://images.unsplash.com/photo-1503387762-592deb58ef4e");
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 40px 20px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .hero h1 {
+      font-size: 38px;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      margin-bottom: 25px;
+      color: #1e3c72;
+    }
+
+    h2, h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #1e3c72;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(45deg,#1e3c72,#2a5298);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #statusBox, #leaderboardBox {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f4f6f9;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .leader-card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    hr {
+      margin: 30px 0;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="hero">
+  <h1>🚀 RECIV</h1>
+  <p>Smart Civic Intelligence & Trust Optimization Platform</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📝 Report Civic Issue</h2>
+
+    <input type="text" id="title" placeholder="Issue Title">
+
+    <select id="category">
+      <option value="">Select Category</option>
+      <option value="Road">🛣 Road Issue</option>
+      <option value="Garbage">🗑 Garbage Problem</option>
+      <option value="Water">💧 Water Leakage</option>
+      <option value="Electricity">⚡ Electricity Issue</option>
+    </select>
+
+    <textarea id="desc" rows="4" placeholder="Describe the issue..."></textarea>
+
+    <input type="file" id="photo">
+
+    <button onclick="submitComplaint()">Submit Complaint</button>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Check Complaint Status</h3>
+
+    <input type="text" id="complaintId" placeholder="Enter Complaint ID">
+
+    <button onclick="checkStatus()">Check Status</button>
+
+    <div id="statusBox"></div>
+  </div>
+
+  <div class="card">
+    <h3>🏆 Department Leaderboard</h3>
+    <div id="leaderboardBox">Loading leaderboard...</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  © 2026 RECIV — Powered by Smart Governance Intelligence
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
