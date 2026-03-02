@@ -17,10 +17,10 @@ var db = firebase.firestore();
 
 function submitComplaint() {
 
-  var title = document.getElementById("title").value;
-  var category = document.getElementById("category").value;
-  var desc = document.getElementById("desc").value;
-  var file = document.getElementById("photo").files[0];
+  let title = document.getElementById("title").value;
+  let category = document.getElementById("category").value;
+  let desc = document.getElementById("desc").value;
+  let file = document.getElementById("photo").files[0];
 
   if (!file) {
     alert("Upload a photo");
@@ -33,19 +33,16 @@ function submitComplaint() {
   if (category === "Water") department = "Water Authority";
   if (category === "Electricity") department = "Power Dept";
 
-  var reader = new FileReader();
+  let reader = new FileReader();
 
   reader.onload = function(e) {
 
-    var imageData = e.target.result;
+    let imageData = e.target.result;
 
-    // Safe Geolocation
     navigator.geolocation.getCurrentPosition(
-      function(position) {
-        processComplaint(position.coords.latitude, position.coords.longitude);
-      },
-      function() {
-        alert("Location not allowed — using default location.");
+      pos => processComplaint(pos.coords.latitude, pos.coords.longitude),
+      () => {
+        alert("Location blocked — using default location");
         processComplaint(0, 0);
       }
     );
@@ -59,6 +56,7 @@ function submitComplaint() {
 
         snapshot.forEach(doc => {
           let old = doc.data();
+
           if (
             Math.abs((old.latitude || 0) - lat) < 0.01 &&
             Math.abs((old.longitude || 0) - lng) < 0.01
@@ -68,50 +66,33 @@ function submitComplaint() {
           }
         });
 
-        /////////////////////////////////////////////////////
-        // ⭐ CLEAN PRIORITY + RECURRING LOGIC
-        /////////////////////////////////////////////////////
-
+        // ⭐ PRIORITY LOGIC
         let priority = "Low";
         let recurring = false;
 
         if (count >= 5) {
           priority = "High";
           recurring = true;
-        }
-        else if (count >= 3) {
+        } else if (count >= 3) {
           priority = "High";
-        }
-        else if (count >= 1) {
+        } else if (count >= 1) {
           priority = "Medium";
         }
 
-        // Popups
-        if (duplicateFound) {
-          alert("⚠️ Similar complaint found nearby!");
-        }
+        // ⭐ POPUPS
+        if (duplicateFound) alert("⚠️ Similar complaint nearby!");
+        if (recurring) alert("🚨 Recurring Problem Area Detected!");
+        alert("🔥 Priority Assigned: " + priority);
 
-        if (recurring) {
-          alert("🚨 Recurring Problem Area Detected!");
-        }
-
-        alert("🔥 Priority Level Assigned: " + priority);
-
-        /////////////////////////////////////////////////////
-        // Resolution Time
-        /////////////////////////////////////////////////////
-
-        let resolutionTime;
-        if (priority === "High") resolutionTime = "1 to 2 days";
-        else if (priority === "Medium") resolutionTime = "3 to 5 days";
-        else resolutionTime = "7 to 10 days";
+        // ⭐ RESOLUTION TIME
+        let resolutionTime =
+          priority === "High" ? "1‑2 days" :
+          priority === "Medium" ? "3‑5 days" :
+          "7‑10 days";
 
         if (recurring) resolutionTime += " (may take longer)";
 
-        /////////////////////////////////////////////////////
-        // Location API
-        /////////////////////////////////////////////////////
-
+        // ⭐ LOCATION NAME
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
         .then(res => res.json())
         .then(data => {
@@ -122,14 +103,10 @@ function submitComplaint() {
             locationName =
               (data.address.road || "") + ", " +
               (data.address.city || "") + ", " +
-              (data.address.state || "") + ", " +
-              (data.address.country || "");
+              (data.address.state || "");
           }
 
-          /////////////////////////////////////////////////////
-          // SAVE TO FIREBASE
-          /////////////////////////////////////////////////////
-
+          // ⭐ SAVE TO FIREBASE
           db.collection("COMPLAINTS").add({
             title,
             description: desc,
@@ -146,11 +123,8 @@ function submitComplaint() {
             timestamp: new Date()
           })
           .then(docRef => {
-            alert("✅ Complaint Submitted! Your ID: " + docRef.id);
+            alert("✅ Complaint Submitted! ID: " + docRef.id);
             loadLeaderboard();
-          })
-          .catch(error => {
-            alert("Error submitting complaint: " + error.message);
           });
 
         });
@@ -170,12 +144,12 @@ function submitComplaint() {
 
 function checkStatus() {
 
-  var id = document.getElementById("complaintId").value;
+  let id = document.getElementById("complaintId").value;
 
   db.collection("COMPLAINTS").doc(id).get().then(doc => {
 
     if (!doc.exists) {
-      document.getElementById("statusBox").innerHTML = "Complaint not found";
+      statusBox.innerHTML = "Complaint not found";
       return;
     }
 
@@ -184,46 +158,36 @@ function checkStatus() {
 
     db.collection("DEPARTMENTS").doc(dept).get().then(depDoc => {
 
-      let trustScore = "Not rated yet";
-      if (depDoc.exists) {
-        trustScore = depDoc.data().trustScore + "%";
-      }
+      let trust = depDoc.exists ? depDoc.data().trustScore + "%" : "Not rated";
 
       if (data.status === "Resolved") {
-
-        document.getElementById("statusBox").innerHTML = `
-          <b>Status:</b> Resolved <br>
-          <b>Department:</b> ${dept} <br>
-          <b>Trust Score:</b> ${trustScore} <br><br>
-
-          <b>Rate Repair Quality:</b><br><br>
-
+        statusBox.innerHTML = `
+          Status: Resolved<br>
+          Department: ${dept}<br>
+          Trust Score: ${trust}<br><br>
+          Rate:<br>
           <button onclick="rateComplaint('${id}',5)">⭐⭐⭐⭐⭐</button>
           <button onclick="rateComplaint('${id}',4)">⭐⭐⭐⭐</button>
           <button onclick="rateComplaint('${id}',3)">⭐⭐⭐</button>
           <button onclick="rateComplaint('${id}',2)">⭐⭐</button>
           <button onclick="rateComplaint('${id}',1)">⭐</button>
         `;
-
       } else {
-
-        document.getElementById("statusBox").innerHTML = `
-          <b>Status:</b> ${data.status} <br>
-          <b>Department:</b> ${dept} <br>
-          <b>Trust Score:</b> ${trustScore} <br><br>
-          Rating available after resolution.
+        statusBox.innerHTML = `
+          Status: ${data.status}<br>
+          Department: ${dept}<br>
+          Trust Score: ${trust}<br>
+          Rating available after resolution
         `;
-
       }
 
     });
 
   });
-
 }
 
 /////////////////////////////////////////////////////
-// ⭐ RATE + UPDATE TRUST SCORE
+// ⭐ RATE COMPLAINT
 /////////////////////////////////////////////////////
 
 function rateComplaint(id, stars) {
@@ -232,45 +196,35 @@ function rateComplaint(id, stars) {
 
     let dept = doc.data().department;
 
-    db.collection("COMPLAINTS").doc(id).update({
-      rating: stars
-    });
+    db.collection("COMPLAINTS").doc(id).update({ rating: stars });
 
     db.collection("DEPARTMENTS").doc(dept).get().then(depDoc => {
 
       if (!depDoc.exists) {
-
         db.collection("DEPARTMENTS").doc(dept).set({
           totalRating: stars,
           totalComplaints: 1,
           trustScore: stars * 20
         });
-
       } else {
-
         let d = depDoc.data();
-        let newTotal = d.totalRating + stars;
-        let newCount = d.totalComplaints + 1;
-        let avg = newTotal / newCount;
-        let score = avg * 20;
+        let total = d.totalRating + stars;
+        let count = d.totalComplaints + 1;
+        let score = (total / count) * 20;
 
         db.collection("DEPARTMENTS").doc(dept).update({
-          totalRating: newTotal,
-          totalComplaints: newCount,
+          totalRating: total,
+          totalComplaints: count,
           trustScore: score.toFixed(1)
         });
-
       }
 
-      document.getElementById("statusBox").innerHTML =
-        "⭐ Rating submitted successfully!";
-
+      statusBox.innerHTML = "⭐ Rating Submitted!";
       loadLeaderboard();
 
     });
 
   });
-
 }
 
 /////////////////////////////////////////////////////
@@ -288,23 +242,16 @@ function loadLeaderboard() {
       let rank = 1;
 
       snapshot.forEach(doc => {
-
-        let data = doc.data();
-
+        let d = doc.data();
         html += `
-          <div>
-            <b>#${rank} ${doc.id}</b><br>
-            Trust Score: ${data.trustScore}%<br>
-            Rated Complaints: ${data.totalComplaints}
-          </div>
-          <hr>
+          <b>#${rank} ${doc.id}</b><br>
+          Trust Score: ${d.trustScore}%<br>
+          Rated Complaints: ${d.totalComplaints}<hr>
         `;
-
         rank++;
       });
 
-      document.getElementById("leaderboardBox").innerHTML =
-        html || "No department ratings yet.";
+      leaderboardBox.innerHTML = html || "No ratings yet";
 
     });
 
