@@ -1,208 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>RECIV Admin Dashboard</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    *{
-      box-sizing:border-box;
-      font-family:'Poppins',sans-serif;
-    }
-
-    body{
-      margin:0;
-      padding:30px;
-      background:linear-gradient(270deg,#0f2027,#203a43,#2c5364);
-      background-size:600% 600%;
-      animation:bgMove 15s ease infinite;
-      color:white;
-    }
-
-    @keyframes bgMove{
-      0%{background-position:0%}
-      50%{background-position:100%}
-      100%{background-position:0%}
-    }
-
-    .header{
-      text-align:center;
-      margin-bottom:30px;
-    }
-
-    .header h1{
-      font-size:36px;
-      margin:0;
-    }
-
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:20px;
-      margin-bottom:30px;
-    }
-
-    .stat-card{
-      background:rgba(255,255,255,0.1);
-      backdrop-filter:blur(15px);
-      border-radius:15px;
-      padding:20px;
-      text-align:center;
-      box-shadow:0 10px 30px rgba(0,0,0,0.4);
-    }
-
-    .stat-card h2{
-      margin:0;
-      font-size:28px;
-    }
-
-    .dashboard{
-      display:grid;
-      grid-template-columns:1fr 2fr;
-      gap:25px;
-    }
-
-    .panel{
-      background:rgba(255,255,255,0.95);
-      border-radius:18px;
-      padding:25px;
-      box-shadow:0 15px 40px rgba(0,0,0,0.4);
-      color:#1e3c72;
-    }
-
-    h2{
-      text-align:center;
-      margin-bottom:15px;
-    }
-
-    .card{
-      background:#f4f6f9;
-      padding:15px;
-      border-radius:12px;
-      margin-bottom:15px;
-      box-shadow:0 5px 15px rgba(0,0,0,0.1);
-      transition:.3s;
-    }
-
-    .card:hover{
-      transform:scale(1.02);
-    }
-
-    .badge{
-      padding:4px 10px;
-      border-radius:20px;
-      font-size:12px;
-      color:white;
-      font-weight:600;
-    }
-
-    .pending{background:orange;}
-    .resolved{background:green;}
-    .high{background:red;}
-    .medium{background:orange;}
-    .low{background:green;}
-
-    button{
-      padding:8px 12px;
-      border:none;
-      border-radius:8px;
-      background:linear-gradient(45deg,#1e3c72,#2a5298);
-      color:white;
-      cursor:pointer;
-      margin-top:8px;
-      font-weight:600;
-      transition:.3s;
-    }
-
-    button:hover{
-      transform:translateY(-3px);
-      box-shadow:0 8px 20px rgba(0,0,0,0.3);
-    }
-
-    .delete-btn{
-      background:crimson;
-    }
-
-    input{
-      width:100%;
-      padding:10px;
-      margin-bottom:15px;
-      border-radius:8px;
-      border:none;
-    }
-
-    img{
-      width:100%;
-      max-width:220px;
-      border-radius:10px;
-      margin-top:8px;
-    }
-
-    a{
-      font-size:13px;
-      color:#1e3c72;
-      text-decoration:none;
-      font-weight:600;
-    }
-
-    a:hover{
-      text-decoration:underline;
-    }
-
-  </style>
-</head>
-
-<body>
-
-<div class="header">
-  <h1>📊 RECIV Admin Dashboard</h1>
-  <p>Smart Civic Intelligence & Governance Analytics</p>
-</div>
-
-<!-- STATS -->
-<div class="stats">
-  <div class="stat-card">
-    <h2 id="totalComplaints">0</h2>
-    Total Complaints
-  </div>
-  <div class="stat-card">
-    <h2 id="pendingCount">0</h2>
-    Pending Issues
-  </div>
-  <div class="stat-card">
-    <h2 id="resolvedCount">0</h2>
-    Resolved Issues
-  </div>
-</div>
-
-<div class="dashboard">
-
-  <!-- Leaderboard -->
-  <div class="panel">
-    <h2>🏆 Department Leaderboard</h2>
-    <div id="leaderboardBox">Loading...</div>
-  </div>
-
-  <!-- Complaints -->
-  <div class="panel">
-    <h2>📋 All Complaints</h2>
-
-    <!-- 🔍 SEARCH BAR -->
-    <input type="text" id="searchBox" placeholder="Search by title, department, status..." onkeyup="filterComplaints()">
-
-    <div id="complaints"></div>
-  </div>
-
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<script>
-
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+// 🔥 Firebase Config
+var firebaseConfig = {
+  apiKey: "AIzaSyDgBVweZ7uSQrKvMOupfRkS-sDBLI2lFNU",
   authDomain: "reciv-21e5d.firebaseapp.com",
   projectId: "reciv-21e5d",
   storageBucket: "reciv-21e5d.firebasestorage.app",
@@ -213,153 +11,303 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
-window.allComplaints = [];
+/////////////////////////////////////////////////////
+// 🔵 SUBMIT COMPLAINT
+/////////////////////////////////////////////////////
+
+function submitComplaint() {
+
+  var title = document.getElementById("title").value;
+  var category = document.getElementById("category").value;
+  var desc = document.getElementById("desc").value;
+  var file = document.getElementById("photo").files[0];
+
+  if (!file) {
+    alert("Upload a photo");
+    return;
+  }
+
+  let department = "General";
+  if (category === "Road") department = "Public Works Dept";
+  if (category === "Garbage") department = "Sanitation Dept";
+  if (category === "Water") department = "Water Authority";
+  if (category === "Electricity") department = "Power Dept";
+
+  var reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    var imageData = e.target.result;
+
+    // Safe Geolocation
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        processComplaint(position.coords.latitude, position.coords.longitude);
+      },
+      function() {
+        alert("Location not allowed — using default location.");
+        processComplaint(0, 0);
+      }
+    );
+
+    function processComplaint(lat, lng) {
+
+      db.collection("COMPLAINTS").get().then(snapshot => {
+
+        let count = 0;
+        let duplicateFound = false;
+
+        snapshot.forEach(doc => {
+          let old = doc.data();
+          if (
+            Math.abs((old.latitude || 0) - lat) < 0.01 &&
+            Math.abs((old.longitude || 0) - lng) < 0.01
+          ) {
+            count++;
+            duplicateFound = true;
+          }
+        });
+
+        /////////////////////////////////////////////////////
+        // ⭐ CLEAN PRIORITY + RECURRING LOGIC
+        /////////////////////////////////////////////////////
+
+        let priority = "Low";
+        let recurring = false;
+
+        if (count >= 5) {
+          priority = "High";
+          recurring = true;
+        }
+        else if (count >= 3) {
+          priority = "High";
+        }
+        else if (count >= 1) {
+          priority = "Medium";
+        }
+
+        // Popups
+        if (duplicateFound) {
+          alert("⚠️ Similar complaint found nearby!");
+        }
+
+        if (recurring) {
+          alert("🚨 Recurring Problem Area Detected!");
+        }
+
+        alert("🔥 Priority Level Assigned: " + priority);
+
+        /////////////////////////////////////////////////////
+        // Resolution Time
+        /////////////////////////////////////////////////////
+
+        let resolutionTime;
+        if (priority === "High") resolutionTime = "1 to 2 days";
+        else if (priority === "Medium") resolutionTime = "3 to 5 days";
+        else resolutionTime = "7 to 10 days";
+
+        if (recurring) resolutionTime += " (may take longer)";
+
+        /////////////////////////////////////////////////////
+        // Location API
+        /////////////////////////////////////////////////////
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(res => res.json())
+        .then(data => {
+
+          let locationName = "Unknown";
+
+          if (data.address) {
+            locationName =
+              (data.address.road || "") + ", " +
+              (data.address.city || "") + ", " +
+              (data.address.state || "") + ", " +
+              (data.address.country || "");
+          }
+
+          /////////////////////////////////////////////////////
+          // SAVE TO FIREBASE
+          /////////////////////////////////////////////////////
+
+          db.collection("COMPLAINTS").add({
+            title,
+            description: desc,
+            image: imageData,
+            latitude: lat,
+            longitude: lng,
+            location: locationName,
+            status: "Pending",
+            priority,
+            recurring,
+            resolutionTime,
+            category,
+            department,
+            timestamp: new Date()
+          })
+          .then(docRef => {
+            alert("✅ Complaint Submitted! Your ID: " + docRef.id);
+            loadLeaderboard();
+          })
+          .catch(error => {
+            alert("Error submitting complaint: " + error.message);
+          });
+
+        });
+
+      });
+
+    }
+
+  };
+
+  reader.readAsDataURL(file);
+}
 
 /////////////////////////////////////////////////////
-// LEADERBOARD
+// ⭐ CHECK STATUS + RATING
+/////////////////////////////////////////////////////
+
+function checkStatus() {
+
+  var id = document.getElementById("complaintId").value;
+
+  db.collection("COMPLAINTS").doc(id).get().then(doc => {
+
+    if (!doc.exists) {
+      document.getElementById("statusBox").innerHTML = "Complaint not found";
+      return;
+    }
+
+    let data = doc.data();
+    let dept = data.department;
+
+    db.collection("DEPARTMENTS").doc(dept).get().then(depDoc => {
+
+      let trustScore = "Not rated yet";
+      if (depDoc.exists) {
+        trustScore = depDoc.data().trustScore + "%";
+      }
+
+      if (data.status === "Resolved") {
+
+        document.getElementById("statusBox").innerHTML = `
+          <b>Status:</b> Resolved <br>
+          <b>Department:</b> ${dept} <br>
+          <b>Trust Score:</b> ${trustScore} <br><br>
+
+          <b>Rate Repair Quality:</b><br><br>
+
+          <button onclick="rateComplaint('${id}',5)">⭐⭐⭐⭐⭐</button>
+          <button onclick="rateComplaint('${id}',4)">⭐⭐⭐⭐</button>
+          <button onclick="rateComplaint('${id}',3)">⭐⭐⭐</button>
+          <button onclick="rateComplaint('${id}',2)">⭐⭐</button>
+          <button onclick="rateComplaint('${id}',1)">⭐</button>
+        `;
+
+      } else {
+
+        document.getElementById("statusBox").innerHTML = `
+          <b>Status:</b> ${data.status} <br>
+          <b>Department:</b> ${dept} <br>
+          <b>Trust Score:</b> ${trustScore} <br><br>
+          Rating available after resolution.
+        `;
+
+      }
+
+    });
+
+  });
+
+}
+
+/////////////////////////////////////////////////////
+// ⭐ RATE + UPDATE TRUST SCORE
+/////////////////////////////////////////////////////
+
+function rateComplaint(id, stars) {
+
+  db.collection("COMPLAINTS").doc(id).get().then(doc => {
+
+    let dept = doc.data().department;
+
+    db.collection("COMPLAINTS").doc(id).update({
+      rating: stars
+    });
+
+    db.collection("DEPARTMENTS").doc(dept).get().then(depDoc => {
+
+      if (!depDoc.exists) {
+
+        db.collection("DEPARTMENTS").doc(dept).set({
+          totalRating: stars,
+          totalComplaints: 1,
+          trustScore: stars * 20
+        });
+
+      } else {
+
+        let d = depDoc.data();
+        let newTotal = d.totalRating + stars;
+        let newCount = d.totalComplaints + 1;
+        let avg = newTotal / newCount;
+        let score = avg * 20;
+
+        db.collection("DEPARTMENTS").doc(dept).update({
+          totalRating: newTotal,
+          totalComplaints: newCount,
+          trustScore: score.toFixed(1)
+        });
+
+      }
+
+      document.getElementById("statusBox").innerHTML =
+        "⭐ Rating submitted successfully!";
+
+      loadLeaderboard();
+
+    });
+
+  });
+
+}
+
+/////////////////////////////////////////////////////
+// 🏆 LEADERBOARD
 /////////////////////////////////////////////////////
 
 function loadLeaderboard() {
+
   db.collection("DEPARTMENTS")
     .orderBy("trustScore", "desc")
     .get()
     .then(snapshot => {
+
       let html = "";
       let rank = 1;
 
       snapshot.forEach(doc => {
+
         let data = doc.data();
+
         html += `
-          <div class="card">
+          <div>
             <b>#${rank} ${doc.id}</b><br>
-            Trust Score: <b>${data.trustScore}%</b><br>
+            Trust Score: ${data.trustScore}%<br>
             Rated Complaints: ${data.totalComplaints}
           </div>
+          <hr>
         `;
+
         rank++;
       });
 
-      document.getElementById("leaderboardBox").innerHTML = html || "No ratings yet.";
+      document.getElementById("leaderboardBox").innerHTML =
+        html || "No department ratings yet.";
+
     });
+
 }
 
-/////////////////////////////////////////////////////
-// LOAD COMPLAINTS + STATS
-/////////////////////////////////////////////////////
-
-db.collection("COMPLAINTS").onSnapshot(snapshot => {
-
-  let html = "";
-  let total = 0;
-  let pending = 0;
-  let resolved = 0;
-
-  window.allComplaints = [];
-
-  snapshot.forEach(doc => {
-
-    total++;
-    let data = doc.data();
-    window.allComplaints.push({ id: doc.id, data });
-
-    if(data.status === "Pending") pending++;
-    if(data.status === "Resolved") resolved++;
-
-    html += createCard(doc.id, data);
-  });
-
-  document.getElementById("complaints").innerHTML = html;
-  document.getElementById("totalComplaints").innerText = total;
-  document.getElementById("pendingCount").innerText = pending;
-  document.getElementById("resolvedCount").innerText = resolved;
-
-});
-
-/////////////////////////////////////////////////////
-// CARD TEMPLATE
-/////////////////////////////////////////////////////
-
-function createCard(id, data){
-  return `
-    <div class="card">
-      <b>${data.title}</b><br>
-      ${data.description}<br><br>
-
-      <b>Status:</b>
-      <span class="badge ${data.status === "Pending" ? "pending" : "resolved"}">
-        ${data.status}
-      </span><br><br>
-
-      <b>Priority:</b>
-      <span class="badge ${data.priority.toLowerCase()}">
-        ${data.priority}
-      </span><br><br>
-
-      <b>Department:</b> ${data.department}<br>
-      <b>Location:</b> ${data.location}<br><br>
-
-      ${data.image ? `<img src="${data.image}"><br>` : ""}
-
-      <a href="https://www.google.com/maps?q=${data.latitude},${data.longitude}" target="_blank">
-        📍 View on Map
-      </a><br><br>
-
-      ${data.status === "Pending"
-        ? `<button onclick="updateStatus('${id}')">Mark Resolved</button>`
-        : `<button class="delete-btn" onclick="deleteComplaint('${id}')">Delete Complaint</button>`
-      }
-    </div>
-  `;
-}
-
-/////////////////////////////////////////////////////
-// SEARCH FUNCTION
-/////////////////////////////////////////////////////
-
-function filterComplaints(){
-  let keyword = document.getElementById("searchBox").value.toLowerCase();
-  let html = "";
-
-  window.allComplaints.forEach(item => {
-    let data = item.data;
-
-    if(
-      data.title.toLowerCase().includes(keyword) ||
-      data.department.toLowerCase().includes(keyword) ||
-      data.status.toLowerCase().includes(keyword)
-    ){
-      html += createCard(item.id, data);
-    }
-  });
-
-  document.getElementById("complaints").innerHTML = html;
-}
-
-/////////////////////////////////////////////////////
-// UPDATE STATUS
-/////////////////////////////////////////////////////
-
-function updateStatus(id){
-  db.collection("COMPLAINTS").doc(id).update({
-    status:"Resolved"
-  });
-}
-
-/////////////////////////////////////////////////////
-// DELETE
-/////////////////////////////////////////////////////
-
-function deleteComplaint(id){
-  if(confirm("Delete this complaint?")){
-    db.collection("COMPLAINTS").doc(id).delete();
-  }
-}
-
-window.onload = function(){
-  loadLeaderboard();
-};
-
-</script>
-
-</body>
-</html>
+window.onload = loadLeaderboard;
