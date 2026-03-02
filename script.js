@@ -92,7 +92,7 @@ function submitComplaint() {
 
         if (recurring) resolutionTime += " (may take longer)";
 
-        // ⭐ LOCATION NAME
+        // ⭐ GET LOCATION NAME
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
         .then(res => res.json())
         .then(data => {
@@ -149,7 +149,7 @@ function checkStatus() {
   db.collection("COMPLAINTS").doc(id).get().then(doc => {
 
     if (!doc.exists) {
-      statusBox.innerHTML = "Complaint not found";
+      document.getElementById("statusBox").innerHTML = "Complaint not found";
       return;
     }
 
@@ -161,7 +161,7 @@ function checkStatus() {
       let trust = depDoc.exists ? depDoc.data().trustScore + "%" : "Not rated";
 
       if (data.status === "Resolved") {
-        statusBox.innerHTML = `
+        document.getElementById("statusBox").innerHTML = `
           Status: Resolved<br>
           Department: ${dept}<br>
           Trust Score: ${trust}<br><br>
@@ -173,7 +173,7 @@ function checkStatus() {
           <button onclick="rateComplaint('${id}',1)">⭐</button>
         `;
       } else {
-        statusBox.innerHTML = `
+        document.getElementById("statusBox").innerHTML = `
           Status: ${data.status}<br>
           Department: ${dept}<br>
           Trust Score: ${trust}<br>
@@ -219,7 +219,7 @@ function rateComplaint(id, stars) {
         });
       }
 
-      statusBox.innerHTML = "⭐ Rating Submitted!";
+      document.getElementById("statusBox").innerHTML = "⭐ Rating Submitted!";
       loadLeaderboard();
 
     });
@@ -251,7 +251,8 @@ function loadLeaderboard() {
         rank++;
       });
 
-      leaderboardBox.innerHTML = html || "No ratings yet";
+      document.getElementById("leaderboardBox").innerHTML =
+        html || "No ratings yet";
 
     });
 
